@@ -1,0 +1,33 @@
+### GET ALL
+GET http://localhost:4001/api/v1/tasks
+
+### CREATE TASK
+POST http://localhost:4001/api/v1/tasks
+Content-Type: application/json
+
+{
+  "title": "Task 2",
+  "description": "This is task 2"
+}
+
+### UPDATE TASK
+PUT http://localhost:4001/api/v1/tasks/c903d824-228f-4001-a470-15354c4d2fd7
+Content-Type: application/json
+
+{
+  "title": "Updated Task 1",
+  "description": "This is the updated task 121"
+}
+
+### DELETE TASK
+DELETE http://localhost:4001/api/v1/tasks/c903d824-228f-4001-a470-15354c4d2fd7
+
+### COMPLETED TASK
+PATCH  http://localhost:4001/api/v1/tasks/c903d824-228f-4001-a470-15354c4d2fd7/complete
+Content-Type: application/json
+
+### IMPORT FROM CSV
+POST http://localhost:4001/api/v1/tasks/import
+Content-Type: multipart/form-data
+Content-Disposition: form-data; name="file"; filename="../tasks.csv"
+Content-Type: text/csv
