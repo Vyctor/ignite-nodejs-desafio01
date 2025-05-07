@@ -5,8 +5,6 @@ import { router } from "./infra/routes/index.js";
 
 config();
 
-const APP_PORT = process.env.APP_PORT || 4001;
-
 const app = express();
 
 app.use(express.json());
