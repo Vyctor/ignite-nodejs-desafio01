@@ -1,6 +1,6 @@
 import { Task } from "../../../domain/task.js";
 
-export class TaskRepository {
+class TaskRepository {
   constructor(mongoClient, redisClient) {
     this.mongoClient = mongoClient;
     this.redisClient = redisClient;
@@ -30,7 +30,6 @@ export class TaskRepository {
     const cachedTask = await this.redisClient.get(cacheKey);
 
     if (cachedTask) {
-      console.info("Cache hit for task:", id);
       return new Task({
         id: cachedTask._id,
         title: cachedTask.title,
@@ -84,8 +83,7 @@ export class TaskRepository {
     }
 
     await this.redisClient.del(`task:${task.id}`);
-
-    return this.mongoClient.instance
+    await this.mongoClient.instance
       .db("tasks")
       .collection("tasks")
       .updateOne(
@@ -99,6 +97,7 @@ export class TaskRepository {
           },
         }
       );
+    return task;
   }
 
   async delete(id) {
@@ -114,3 +113,5 @@ export class TaskRepository {
     await this.redisClient.del(`task:${id}`);
   }
 }
+
+export { TaskRepository };
