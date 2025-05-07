@@ -1,20 +1,20 @@
 import { randomUUID } from "crypto";
 
 class Task {
-  #id;
-  #title;
-  #description;
-  #createdAt;
-  #updatedAt;
-  #completedAt;
+  id;
+  title;
+  description;
+  createdAt;
+  updatedAt;
+  completedAt;
 
   constructor({ id, title, description, createdAt, updatedAt, completedAt }) {
-    this.#id = id;
-    this.#title = title;
-    this.#description = description;
-    this.#createdAt = createdAt;
-    this.#updatedAt = updatedAt;
-    this.#completedAt = completedAt;
+    this.id = id;
+    this.title = title;
+    this.description = description;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+    this.completedAt = completedAt;
   }
 
   static build({ title, description }) {
@@ -28,54 +28,19 @@ class Task {
     });
   }
 
-  get id() {
-    return this.#id;
+  updateTitle(title) {
+    this.title = title;
+    this.updatedAt = new Date();
   }
 
-  get title() {
-    return this.#title;
+  updateDescription(description) {
+    this.description = description;
+    this.updatedAt = new Date();
   }
 
-  get description() {
-    return this.#description;
-  }
-
-  get createdAt() {
-    return this.#createdAt;
-  }
-
-  get updatedAt() {
-    return this.#updatedAt;
-  }
-
-  get completedAt() {
-    return this.#completedAt;
-  }
-
-  set title(title) {
-    this.#title = title;
-    this.#updatedAt = new Date();
-  }
-
-  set description(description) {
-    this.#description = description;
-    this.#updatedAt = new Date();
-  }
-
-  set completedAt(completedAt) {
-    this.#completedAt = completedAt;
-    this.#updatedAt = new Date();
-  }
-
-  toJSON() {
-    return {
-      id: this.#id,
-      title: this.#title,
-      description: this.#description,
-      createdAt: this.#createdAt,
-      updatedAt: this.#updatedAt,
-      completedAt: this.#completedAt,
-    };
+  complete() {
+    this.completedAt = new Date();
+    this.updatedAt = new Date();
   }
 }
 

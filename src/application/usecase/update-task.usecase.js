@@ -14,8 +14,8 @@ export class UpdateTaskUsecase {
     if (!task) {
       throw new Error("Task not found");
     }
-    task.title = title;
-    task.description = description;
-    return await this.taskRepository.update(id, task);
+    task.updateTitle(title);
+    task.updateDescription(description);
+    return await this.taskRepository.update(task);
   }
 }

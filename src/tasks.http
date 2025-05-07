@@ -1,6 +1,9 @@
 ### GET ALL
 GET http://localhost:4001/api/v1/tasks
 
+### FIND BY ID
+GET http://localhost:4001/api/v1/tasks/c47a8534-ddd8-4a0b-a8cf-9c5e574e40e4
+
 ### CREATE TASK
 POST http://localhost:4001/api/v1/tasks
 Content-Type: application/json
@@ -11,7 +14,7 @@ Content-Type: application/json
 }
 
 ### UPDATE TASK
-PUT http://localhost:4001/api/v1/tasks/c903d824-228f-4001-a470-15354c4d2fd7
+PUT http://localhost:4001/api/v1/tasks/c47a8534-ddd8-4a0b-a8cf-9c5e574e40e4
 Content-Type: application/json
 
 {
@@ -20,10 +23,10 @@ Content-Type: application/json
 }
 
 ### DELETE TASK
-DELETE http://localhost:4001/api/v1/tasks/c903d824-228f-4001-a470-15354c4d2fd7
+DELETE http://localhost:4001/api/v1/tasks/2a386bdb-884f-4b42-86ff-0c0487b2aacb
 
-### COMPLETED TASK
-PATCH  http://localhost:4001/api/v1/tasks/c903d824-228f-4001-a470-15354c4d2fd7/complete
+### COMPLETE TASK
+PATCH  http://localhost:4001/api/v1/tasks/ad118395-ab00-4155-a964-14f5a330063f/complete
 Content-Type: application/json
 
 ### IMPORT FROM CSV

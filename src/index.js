@@ -11,10 +11,12 @@ import { DeleteTaskUsecase } from "./application/usecase/delete-task.usecase.js"
 import { ImportTasksFromCsvUsecase } from "./application/usecase/import-tasks-from-csv.usecase.js";
 import csvParser from "csv-parser";
 import fs from "fs";
+import { MongoClient } from "./infra/database/mongo-client.js";
+import { FindTaskByIdUsecase } from "./application/usecase/find-task-by-id.usecase.js";
+import { RedisClient } from "./infra/cache/redis-client.js";
 
 config();
 
-const tasks = [];
 const upload = multer({ dest: "uploads/" });
 const uploadMiddleware = upload.single("file");
 
@@ -32,7 +34,10 @@ app.use(
   })
 );
 
-const taskRepository = TaskRepository.getInstance();
+const mongoClient = new MongoClient();
+const redisClient = new RedisClient();
+const taskRepository = new TaskRepository(mongoClient, redisClient);
+const findTaskByIdUsecase = new FindTaskByIdUsecase(taskRepository);
 const findAllTasksUsecase = new FindAllTasksUsecase(taskRepository);
 const createTaskUsecase = new CreateTaskUsecase(taskRepository);
 const updateTaskUsecase = new UpdateTaskUsecase(taskRepository);
@@ -48,6 +53,18 @@ app.get("/api/v1/tasks", async (req, res) => {
   const tasks = await findAllTasksUsecase.execute();
   return res.status(200).json({
     tasks,
+  });
+});
+
+app.get("/api/v1/tasks/:id", async (req, res) => {
+  const task = await findTaskByIdUsecase.execute(req.params.id);
+  if (!task) {
+    return res.status(404).json({
+      message: "Task not found",
+    });
+  }
+  return res.status(200).json({
+    task,
   });
 });
 

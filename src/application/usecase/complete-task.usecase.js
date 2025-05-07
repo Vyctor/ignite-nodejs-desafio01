@@ -8,13 +8,14 @@ export class CompleteTaskUsecase {
       throw new Error("Id is required");
     }
     const task = await this.taskRepository.findById(id);
+    console.log("task from usecase", task);
     if (!task) {
       throw new Error("Task not found");
     }
     if (task.completedAt) {
       throw new Error("Task already completed");
     }
-    task.completedAt = new Date();
-    return await this.taskRepository.update(id, task);
+    task.complete();
+    return await this.taskRepository.update(task);
   }
 }

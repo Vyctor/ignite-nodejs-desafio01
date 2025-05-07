@@ -1,51 +1,116 @@
+import { Task } from "../../../domain/task.js";
+
 export class TaskRepository {
-  static #instance = null;
-  #tasks = [];
-
-  constructor() {
-    if (TaskRepository.#instance) {
-      return TaskRepository.#instance;
-    }
-    this.tasks = [];
-    TaskRepository.#instance = this;
-  }
-
-  static getInstance() {
-    if (!TaskRepository.#instance) {
-      TaskRepository.#instance = new TaskRepository();
-    }
-    return TaskRepository.#instance;
+  constructor(mongoClient, redisClient) {
+    this.mongoClient = mongoClient;
+    this.redisClient = redisClient;
   }
 
   async findAll() {
-    return this.#tasks;
+    const data = await this.mongoClient.instance
+      .db("tasks")
+      .collection("tasks")
+      .find()
+      .toArray();
+
+    return data.map((task) => {
+      return new Task({
+        id: task._id,
+        title: task.title,
+        description: task.description,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+        completedAt: task.completedAt,
+      });
+    });
   }
 
   async findById(id) {
-    return this.#tasks.find((task) => task.id === id);
-  }
+    const cacheKey = `task:${id}`;
+    const cachedTask = await this.redisClient.get(cacheKey);
 
-  async create(task) {
-    this.#tasks.push(task);
+    if (cachedTask) {
+      console.info("Cache hit for task:", id);
+      return new Task({
+        id: cachedTask._id,
+        title: cachedTask.title,
+        description: cachedTask.description,
+        createdAt: cachedTask.createdAt,
+        updatedAt: cachedTask.updatedAt,
+        completedAt: cachedTask.completedAt,
+      });
+    }
+    const data = await this.mongoClient.instance
+      .db("tasks")
+      .collection("tasks")
+      .findOne({ _id: id });
+
+    if (!data) {
+      return null;
+    }
+
+    const task = new Task({
+      id: data._id,
+      title: data.title,
+      description: data.description,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      completedAt: data.completedAt,
+    });
+
+    await this.redisClient.set(cacheKey, task, {
+      EX: 60 * 60,
+    });
+
     return task;
   }
 
-  async update(id, task) {
-    const index = this.#tasks.findIndex((t) => t.id === id);
-    if (index === -1) {
+  async create(task) {
+    await this.mongoClient.instance.db("tasks").collection("tasks").insertOne({
+      _id: task.id,
+      title: task.title,
+      description: task.description,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      completedAt: task.completedAt,
+    });
+    return task;
+  }
+
+  async update(task) {
+    const taskExists = await this.findById(task.id);
+    if (!taskExists) {
       return null;
     }
-    this.#tasks[index] = task;
-    return this.#tasks[index];
+
+    await this.redisClient.del(`task:${task.id}`);
+
+    return this.mongoClient.instance
+      .db("tasks")
+      .collection("tasks")
+      .updateOne(
+        { _id: task.id },
+        {
+          $set: {
+            title: task.title,
+            description: task.description,
+            updatedAt: task.updatedAt,
+            completedAt: task.completedAt,
+          },
+        }
+      );
   }
 
   async delete(id) {
-    const index = this.#tasks.findIndex((task) => task.id === id);
-    if (index === -1) {
+    const task = await this.findById(id);
+    if (!task) {
       return null;
     }
-    const deletedTask = this.#tasks[index];
-    this.#tasks.splice(index, 1);
-    return deletedTask;
+    await this.mongoClient.instance
+      .db("tasks")
+      .collection("tasks")
+      .deleteOne({ _id: id });
+
+    await this.redisClient.del(`task:${id}`);
   }
 }

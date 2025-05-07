@@ -4,16 +4,16 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
-    networks:
-      - my_network
     volumes:
       - .docker/redis:/data
   mongo:
     image: mongo:latest
     container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: tasks
+      MONGO_INITDB_ROOT_PASSWORD: tasks
+      MONGO_INITDB_DATABASE: tasks
     ports:
       - "27017:27017"
-    networks:
-      - my_network
     volumes:
       - .docker/mongo:/data/db
